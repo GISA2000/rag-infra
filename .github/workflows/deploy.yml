@@ -1,4 +1,5 @@
 name: CI/CD Pipeline
+
 on:
   push:
     branches: [ main ]
@@ -8,22 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
       id-token: write
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Login to GHCR
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-
-      - name: Build image
-        run: |
-          IMAGE=ghcr.io/${{ github.repository }}/rag-service:latest
-          docker build -t $IMAGE .
-          docker push $IMAGE
-
-      - name: Configure AWS creds
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -38,5 +30,4 @@ jobs:
           kubectl apply -f infrastructure/k8s/namespace.yaml
           kubectl apply -f infrastructure/k8s/deployment.yaml
           kubectl apply -f infrastructure/k8s/service.yaml
-          kubectl apply -f infrastructure/k8s/ingress.yamly
-          
+          kubectl apply -f infrastructure/k8s/ingress.yaml
